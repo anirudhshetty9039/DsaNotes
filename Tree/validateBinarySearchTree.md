@@ -2,7 +2,9 @@
 
 ## Approach
 
-Check each node against a valid range. A node must be strictly greater than its lower bound and strictly less than its upper bound. Pass the current value as the upper bound to the left subtree and as the lower bound to the right subtree. Use `long` bounds so `Integer.MIN_VALUE` and `Integer.MAX_VALUE` are valid node values.
+An inorder traversal of a valid binary search tree visits node values in strictly increasing order. Keep the previously visited value and compare it with each current node. If the current value is not greater, the tree is invalid.
+
+The `prev` field is reset at the start of `isValidBST` so the result does not depend on an earlier call to the same `Solution` instance.
 
 ## Java Solution
 
@@ -24,26 +26,33 @@ Check each node against a valid range. A node must be strictly greater than its 
  * }
  */
 class Solution {
+    private Integer prev;
+
     public boolean isValidBST(TreeNode root) {
-        return check(root, Long.MIN_VALUE, Long.MAX_VALUE);
+        prev = null;
+        return inorder(root);
     }
 
-    private boolean check(TreeNode root, long min, long max) {
+    private boolean inorder(TreeNode root) {
         if (root == null) {
             return true;
         }
 
-        if (root.val <= min || root.val >= max) {
+        if (!inorder(root.left)) {
             return false;
         }
 
-        return check(root.left, min, root.val)
-                && check(root.right, root.val, max);
+        if (prev != null && prev >= root.val) {
+            return false;
+        }
+
+        prev = root.val;
+        return inorder(root.right);
     }
 }
 ```
 
 ## Complexity
 
-- **Time:** `O(n)`, where `n` is the number of nodes; each node is checked once.
+- **Time:** `O(n)` in the worst case, where `n` is the number of nodes.
 - **Space:** `O(h)` recursion stack, where `h` is the tree height.
